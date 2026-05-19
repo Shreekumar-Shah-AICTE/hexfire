@@ -10,6 +10,16 @@ export const ReportView: React.FC<ReportViewProps> = ({ reportMarkdown, onClose 
     window.print();
   };
 
+  const handleExportMarkdown = () => {
+    const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(reportMarkdown);
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `hexfire_report_${Date.now()}.md`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
   // Basic markdown parser
   const renderMarkdown = (md: string) => {
     return md.split('\n').map((line, idx) => {
@@ -73,6 +83,21 @@ export const ReportView: React.FC<ReportViewProps> = ({ reportMarkdown, onClose 
             📊 Forensic Resilience Report
           </h3>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={handleExportMarkdown}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                backgroundColor: 'rgba(255,255,255,0.02)',
+                color: '#fff',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Export MD
+            </button>
             <button
               onClick={handlePrint}
               style={{

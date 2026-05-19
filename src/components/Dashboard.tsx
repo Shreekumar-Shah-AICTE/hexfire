@@ -25,6 +25,7 @@ export const Dashboard: React.FC = () => {
   const [, setCascades] = useState<CascadeResult[]>([]);
   const [resilienceScore, setResilienceScore] = useState<ResilienceScore | null>(null);
   const [auditLog, setAuditLog] = useState<AuditExport | null>(null);
+  const [animationIndex, setAnimationIndex] = useState<number>(-1); // -1 means no animation or finished
 
   // Report states
   const [reportMarkdown, setReportMarkdown] = useState<string | null>(null);
@@ -32,15 +33,24 @@ export const Dashboard: React.FC = () => {
 
   // Map steps to match faulted format
   const activePipeline = PIPELINES_MAP[selectedPipelineId];
+  
+  const cleanSteps: FaultedStep[] = activePipeline.steps.map((s, idx) => {
+    const stepFaults = faults.filter(f => f.targetStepIndex === idx);
+    return {
+      ...s,
+      isFaulted: false,
+      status: 'passed',
+      latencyMs: 65,
+      actualOutput: s.expectedOutput,
+      pendingFaults: stepFaults.length > 0 ? stepFaults : undefined
+    } as FaultedStep & { pendingFaults?: FaultConfig[] };
+  });
+
   const stepsToRender: FaultedStep[] = testResult 
-    ? testResult.faultedPipeline
-    : activePipeline.steps.map(s => ({
-        ...s,
-        isFaulted: false,
-        status: 'passed',
-        latencyMs: 65,
-        actualOutput: s.expectedOutput
-      }));
+    ? testResult.faultedPipeline.map((step, idx) => (
+        animationIndex !== -1 && idx > animationIndex ? cleanSteps[idx] : step
+      ))
+    : cleanSteps;
 
   const handlePipelineSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPipelineId(e.target.value as keyof typeof PIPELINES_MAP);
@@ -51,21 +61,51 @@ export const Dashboard: React.FC = () => {
     setResilienceScore(null);
     setAuditLog(null);
     setReportMarkdown(null);
+    setAnimationIndex(-1);
   };
 
   const handleRunChaosTest = async () => {
     setRunning(true);
     setReportMarkdown(null);
+    setAnimationIndex(-1);
+    setTestResult(null);
+    setResilienceScore(null);
+    setAuditLog(null);
+
     try {
       const data = await runChaosTestApi(selectedPipelineId, faults);
+      
+      // We have the data, now we animate it
       setTestResult(data.result);
-      setCascades(data.cascades);
-      setResilienceScore(data.score);
-      setAuditLog(data.audit);
+      setAnimationIndex(0);
+
+      // Animate the propagation
+      let currentIdx = 0;
+      const totalSteps = data.result.faultedPipeline.length;
+      
+      const interval = setInterval(() => {
+        currentIdx++;
+        setAnimationIndex(currentIdx);
+        
+        // Move selection to the step currently being animated if it has an error
+        if (data.result.faultedPipeline[currentIdx]?.status !== 'passed') {
+          setSelectedStepIdx(currentIdx);
+        }
+
+        if (currentIdx >= totalSteps) {
+          clearInterval(interval);
+          setAnimationIndex(-1);
+          // Show the final score and audit log only after the cascade animation is complete
+          setCascades(data.cascades);
+          setResilienceScore(data.score);
+          setAuditLog(data.audit);
+          setRunning(false);
+        }
+      }, 800); // 800ms per step
+
     } catch (err) {
       console.error(err);
       alert("Failed to run chaos tests. Check backend console logs.");
-    } finally {
       setRunning(false);
     }
   };
@@ -100,6 +140,7 @@ export const Dashboard: React.FC = () => {
     setResilienceScore(null);
     setAuditLog(null);
     setReportMarkdown(null);
+    setAnimationIndex(-1);
   };
 
   return (
@@ -238,7 +279,12 @@ export const Dashboard: React.FC = () => {
                 </pre>
               </div>
               <div>
-                <span style={{ color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>ACTUAL/EXPECTED OUTPUT</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                  <span style={{ color: '#64748b', fontWeight: 600, display: 'block' }}>ACTUAL OUTPUT</span>
+                  {stepsToRender[selectedStepIdx].type === 'llm_call' && (
+                    <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.1rem 0.3rem', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>⚡ Vultr Serverless Inference</span>
+                  )}
+                </div>
                 <pre style={{ padding: '0.5rem', borderRadius: '6px', background: 'rgba(0,0,0,0.2)', color: '#22c55e', overflowX: 'auto', fontFamily: 'var(--font-mono)' }}>
                   {stepsToRender[selectedStepIdx].actualOutput}
                 </pre>

@@ -156,10 +156,37 @@ export const PipelineView: React.FC<PipelineViewProps> = ({
                   {step.faultApplied?.split('_')[0]}
                 </div>
               )}
+              
+              {/* Pending Fault Badge (Before Test Run) */}
+              {!step.isFaulted && (step as any).pendingFaults && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  padding: '0.2rem 0.5rem',
+                  backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                  border: '1px dashed #f97316',
+                  borderRadius: '4px',
+                  color: '#f97316',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                  animation: 'pulse 2s infinite'
+                }}>
+                  TARGETED: {(step as any).pendingFaults.length} FAULT{(step as any).pendingFaults.length > 1 ? 'S' : ''}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+      
+      <style>{`
+        @keyframes pulse {
+          0% { opacity: 0.7; }
+          50% { opacity: 1; border-color: #fb923c; }
+          100% { opacity: 0.7; }
+        }
+      `}</style>
     </div>
   );
 };
