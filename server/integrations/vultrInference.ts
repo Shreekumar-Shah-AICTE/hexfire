@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+// Node 22+ provides global fetch — no import needed
 
 const VULTR_ENDPOINT = 'https://api.vultrinference.com/v1/chat/completions';
 
