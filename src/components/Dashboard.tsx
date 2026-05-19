@@ -88,7 +88,7 @@ export const Dashboard: React.FC = () => {
         setAnimationIndex(currentIdx);
         
         // Move selection to the step currently being animated if it has an error
-        if (data.result.faultedPipeline[currentIdx]?.status !== 'passed') {
+        if (currentIdx < totalSteps && data.result.faultedPipeline[currentIdx]?.status !== 'passed') {
           setSelectedStepIdx(currentIdx);
         }
 
@@ -269,28 +269,28 @@ export const Dashboard: React.FC = () => {
             }}
           >
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.02em', borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: '0.5rem' }}>
-              Inspect Step: {stepsToRender[selectedStepIdx].name}
+              Inspect Step: {stepsToRender[selectedStepIdx]?.name}
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.8rem' }}>
               <div>
                 <span style={{ color: '#64748b', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>EXPECTED INPUT</span>
                 <pre style={{ padding: '0.5rem', borderRadius: '6px', background: 'rgba(0,0,0,0.2)', color: '#a855f7', overflowX: 'auto', fontFamily: 'var(--font-mono)' }}>
-                  {stepsToRender[selectedStepIdx].input}
+                  {stepsToRender[selectedStepIdx]?.input}
                 </pre>
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
                   <span style={{ color: '#64748b', fontWeight: 600, display: 'block' }}>ACTUAL OUTPUT</span>
-                  {stepsToRender[selectedStepIdx].type === 'llm_call' && (
+                  {stepsToRender[selectedStepIdx]?.type === 'llm_call' && (
                     <span style={{ fontSize: '0.65rem', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.1rem 0.3rem', borderRadius: '4px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>⚡ Vultr Serverless Inference</span>
                   )}
                 </div>
                 <pre style={{ padding: '0.5rem', borderRadius: '6px', background: 'rgba(0,0,0,0.2)', color: '#22c55e', overflowX: 'auto', fontFamily: 'var(--font-mono)' }}>
-                  {stepsToRender[selectedStepIdx].actualOutput}
+                  {stepsToRender[selectedStepIdx]?.actualOutput}
                 </pre>
               </div>
             </div>
-            {stepsToRender[selectedStepIdx].error && (
+            {stepsToRender[selectedStepIdx]?.error && (
               <div style={{
                 marginTop: '1rem',
                 padding: '0.5rem 0.75rem',
