@@ -29,7 +29,24 @@ Format the output as clean, clean markdown without any enclosing backticks \`\`\
 async function tryModel(ai: GoogleGenAI, model: string, prompt: string): Promise<string> {
   console.log(`[Gemini] Attempting model: ${model}`);
   const response = await ai.models.generateContent({ model, contents: prompt });
-  return response.text || 'Failed to extract text from Gemini response.';
+  
+  if (response.text) {
+    return response.text;
+  }
+  
+  // Try manual extraction
+  const parts = response.candidates?.[0]?.content?.parts;
+  if (parts && parts.length > 0 && parts[0].text) {
+    return parts[0].text;
+  }
+  
+  // Check for safety block
+  const finishReason = response.candidates?.[0]?.finishReason;
+  if (finishReason && finishReason !== 'STOP') {
+    throw new Error(`Model stopped unexpectedly with finishReason: ${finishReason}`);
+  }
+  
+  throw new Error(`Failed to extract text. Raw response candidates: ${JSON.stringify(response.candidates)}`);
 }
 
 export async function generateResilienceReport(
