@@ -168,10 +168,33 @@ export const Dashboard: React.FC = () => {
         backdropFilter: 'blur(10px)',
         zIndex: 5
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.25rem' }}>🔥</span>
-          <span style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.05em', color: '#fb923c' }}>HEXFIRE</span>
-          <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.4rem', border: '1px solid rgba(249, 115, 22, 0.4)', borderRadius: '4px', color: '#f97316', marginLeft: '0.5rem', fontWeight: 700 }}>ENGINE CORE</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ 
+            position: 'relative', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}>
+            <div style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle, rgba(249,115,22,0.6) 0%, rgba(0,0,0,0) 70%)',
+              filter: 'blur(8px)',
+              zIndex: -1
+            }} />
+            <img 
+              src="/hexfire-logo.png" 
+              alt="Hexfire Logo" 
+              style={{ 
+                height: '32px', 
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.4))'
+              }} 
+            />
+          </div>
+          <span style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '0.08em', color: '#f8fafc', textShadow: '0 0 10px rgba(255,255,255,0.1)' }}>HEXFIRE</span>
+          <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', border: '1px solid rgba(249, 115, 22, 0.4)', borderRadius: '4px', color: '#f97316', marginLeft: '0.5rem', fontWeight: 700, letterSpacing: '0.05em', background: 'rgba(249, 115, 22, 0.05)' }}>ENGINE CORE</span>
         </div>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <select 
