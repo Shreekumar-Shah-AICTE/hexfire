@@ -30,7 +30,7 @@ Inspired by Netflix's Chaos Monkey (which deliberately breaks servers to make th
 
 **One click. Six deterministic fault scenarios. A resilience score your CTO can read.**
 
-### How It Works
+### The 5 Pillars of HEXFIRE
 1. **Targeted Fault Injection:** We inject 6 specific types of chaos directly into your pipeline. You choose the exact step and the exact severity.
 2. **DAG Cascade Analysis:** Watch the "blast radius" propagate in real-time. If step 2 hallucinates, we mathematically map how it corrupts steps 3, 4, and 5.
 3. **Deterministic Resilience Scoring:** We compute a hard, mathematical ★-to-★★★★★ rating based on Survival Rate, Recovery, Fault Isolation, and Graceful Degradation.
@@ -69,6 +69,71 @@ A championship-tier system must contain core IP. HEXFIRE is not a thin API wrapp
 
 ---
 
+## 🏗️ System Architecture & Data Flow
+
+HEXFIRE is built on a highly modular event-driven architecture that completely separates the chaos engine from the LLM execution layer.
+
+```mermaid
+graph TD
+    User([Enterprise User]) --> Dashboard[React 19 Dashboard]
+    Dashboard --> API[Express.js Chaos Engine]
+    
+    subgraph "HEXFIRE Core Logic"
+        API --> FI[Fault Injector Node]
+        API --> DAG[DAG Cascade Engine]
+        API --> Score[Resilience Mathematics]
+        API --> Crypto[SHA-256 Audit Logger]
+    end
+    
+    FI -->|Intercepts & Corrupts Context| Vultr[Vultr Serverless Inference]
+    Vultr -->|Executes: kimi-k2-instruct| Agent[Agent Under Test]
+    
+    DAG --> ReportGen[Gemini 2.5 Flash]
+    Score --> ReportGen
+    
+    ReportGen -->|Markdown Forensic Output| Dashboard
+    Crypto -->|Hash Chain Block| DB[(Immutable JSON Log)]
+```
+
+### Deep-Dive 1: The DAG Cascade Engine
+Agent pipelines aren't linear; they are Directed Acyclic Graphs (DAGs). When a fault hits one node, HEXFIRE mathematically traverses the downstream edges to determine the entire "blast radius" of the failure.
+
+```mermaid
+graph LR
+    A[Extract Intent] --> B[Classify Severity]
+    B -->|FAULT INJECTED HERE| C[Search Knowledge Base]
+    B --> D[Route to Human]
+    C -.->|Corrupted Data Cascade| E[Generate Output]
+    D -.->|Latency Cascade| E
+    
+    classDef safe fill:#22c55e,color:white,stroke-width:2px;
+    classDef fault fill:#ef4444,color:white,stroke-width:4px,stroke:#b91c1c;
+    classDef cascade fill:#f97316,color:white,stroke-width:2px,stroke-dasharray: 5 5;
+    
+    class A safe
+    class B fault
+    class C,D,E cascade
+```
+*Nodes in green survive. The red node is the epicenter. Orange nodes are the mathematically calculated blast radius.*
+
+### Deep-Dive 2: The Cryptographic Audit Chain
+Enterprise security officers require proof that compliance tests actually ran and weren't tampered with. HEXFIRE solves this using native cryptographic hashing.
+
+```mermaid
+sequenceDiagram
+    participant Engine as Chaos Engine
+    participant Crypto as SHA-256 Logger
+    participant DB as Immutable Storage
+    
+    Engine->>Crypto: Emit Fault Result
+    Crypto->>DB: Fetch Previous Block Hash
+    Note over Crypto,DB: Hash(PrevHash + Timestamp + Result Payload)
+    Crypto->>DB: Append New Block to Chain
+    DB-->>Engine: Return Verified Validation
+```
+
+---
+
 ## 🧮 The Mathematics of Agent Resilience
 
 HEXFIRE doesn't rely on "vibes" to tell you if your agent is safe. It relies on cold mathematics. The **Hexfire Resilience Score (R-Score)** is calculated using a weighted deterministic formula:
@@ -92,53 +157,13 @@ Star Rating Classifications:
 
 ---
 
-## 🏗️ Architecture Matrix
-
-HEXFIRE represents a modern, event-driven orchestration layer that separates testing logic, LLM execution, and forensics.
-
-```text
-┌─────────────────────────────────────────────────────────┐
-│                    HEXFIRE PLATFORM                      │
-│                                                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐│
-│  │  FAULT   │  │ CASCADE  │  │RESILIENCE│  │  AUDIT   ││
-│  │ INJECTOR │──│  GRAPH   │──│  SCORER  │──│  CHAIN   ││
-│  │ (6 types)│  │  (DAG)   │  │ (R-score)│  │ (SHA-256)││
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘│
-│       │              │              │              │      │
-│       ▼              ▼              ▼              ▼      │
-│  ┌──────────────────────────────────────────────────────┐│
-│  │            GEMINI 2.5 FLASH (Google AI)              ││
-│  │     Resilience Report Generation + Prompt Attacks    ││
-│  └──────────────────────────────────────────────────────┘│
-│       │                                                   │
-│       ▼                                                   │
-│  ┌──────────────────────────────────────────────────────┐│
-│  │         VULTR SERVERLESS INFERENCE                   ││
-│  │    Agent-Under-Test execution (kimi-k2-instruct)     ││
-│  └──────────────────────────────────────────────────────┘│
-│       │                                                   │
-│       ▼                                                   │
-│  ┌──────────────────────────────────────────────────────┐│
-│  │         VULTR CLOUD COMPUTE                          ││
-│  │    Production Deployment (Ubuntu + Nginx + PM2)      ││
-│  └──────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────┘
-```
-
-### Deep-Dive: Cryptographic Audit Trail
-When dealing with AI safety compliance (e.g., EU AI Act), logs cannot be mutable. HEXFIRE hashes every step of the testing execution using **SHA-256 cryptographic chaining**. 
-Each log entry contains a `hash` that includes the `previousHash`, the `faultType`, and the `agentResponse`. If any record in the testing database is altered, the chain breaks, immediately flagging a compliance violation.
-
----
-
 ## ⚡ Tech Stack Supremacy
 
 | Layer | Technology | Purpose |
 |---|---|---|
 | **Frontend UI** | React 19 + TypeScript + Vite | Premium dark-themed glassmorphism dashboard (Type D-lite resonance) |
 | **Backend Core** | Express.js + Node.js 22 | High-throughput REST API for the chaos engine |
-| **Generative AI** | Google Gemini 2.5 Flash | Resilience report generation, forensic analysis, & fallback chain routing |
+| **Generative AI** | Google Gemini 2.5 Flash | Resilience report generation, forensic analysis, & multi-model fallback chains |
 | **Agent Engine** | Vultr Serverless Inference | Ultra-low latency Agent-under-test execution using custom models |
 | **Crypto/Security** | Node.js native `crypto` | Tamper-proof SHA-256 compliance hashing |
 | **Infrastructure**| Vultr Cloud Compute | Active production hosting (Ubuntu 24.04 + Nginx + PM2) |
@@ -191,9 +216,22 @@ sudo systemctl restart nginx
 ## 🗺️ Product Roadmap
 
 While HEXFIRE is fully functional today, we are charting a path toward enterprise-wide chaos orchestration:
-- [ ] **Phase 2:** Automated Chaos Cron Jobs — Schedule HEXFIRE to run daily against staging environments.
-- [ ] **Phase 3:** CI/CD Integration — Block GitHub pull requests if the Agentic R-Score drops below ★★★☆☆.
-- [ ] **Phase 4:** Bring-Your-Own-Agent (BYOA) — Expose a webhook listener so enterprises can test any internal agent architecture regardless of the LLM provider.
+- **Phase 2 (Q3 2026):** Automated Chaos Cron Jobs — Schedule HEXFIRE to run daily against staging environments to catch regressions before they deploy.
+- **Phase 3 (Q4 2026):** CI/CD Pipeline Integration — Block GitHub pull requests if the Agentic R-Score drops below ★★★☆☆.
+- **Phase 4 (Q1 2027):** Bring-Your-Own-Agent (BYOA) — Expose a universal webhook listener so enterprises can test any internal agent architecture regardless of the LLM provider.
+
+---
+
+## 🧠 FAQ for Hackathon Judges
+
+**Q: Is HEXFIRE just a prompt wrapper?**
+**A:** No. The core fault engine, the DAG cascade algorithm, the mathematical R-Score validator, and the SHA-256 cryptographic chain are entirely custom, deterministic computer science implementations. Gemini is only used at the end of the pipeline to translate the mathematical wreckage into human-readable forensics.
+
+**Q: Why use Vultr Serverless Inference?**
+**A:** Chaos testing requires massive concurrency and ultra-low latency. Standard LLM APIs rate-limit too quickly during a chaos spike. Vultr Serverless Inference allows us to pound the Agent-Under-Test with hundreds of concurrent fault permutations without hitting bottleneck walls.
+
+**Q: How do you handle Gemini capacity limits?**
+**A:** We implemented a robust multi-model fallback chain in the server (`gemini.ts`). If `gemini-2.5-flash` returns a 503 capacity error, the system automatically falls back to `gemini-2.5-flash-lite`, and includes exponential backoff retry logic.
 
 ---
 
